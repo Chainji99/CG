@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CG Exam - เฉลยแยกพาร์ท</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; color: #333; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; }
+        
+        .part-section { margin-bottom: 50px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; background: #fff; }
+        .part-header { background: #1a73e8; color: white; padding: 12px; margin: -20px -20px 20px -20px; border-radius: 10px 10px 0 0; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; }
+        
+        .q-box { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; transition: 0.3s; }
+        .q-title { font-weight: bold; margin-bottom: 10px; display: block; }
+        .options { display: flex; flex-direction: column; gap: 8px; }
+        label { padding: 10px; border: 1px solid #f0f0f0; border-radius: 6px; cursor: pointer; }
+        label:hover { background: #f8f9fa; }
+        input[type="radio"] { margin-right: 10px; }
+
+        /* การแสดงผลเฉลย */
+        .wrong-box { border: 2px solid #d32f2f; background-color: #fff8f8; }
+        .correct-box { border: 2px solid #2e7d32; background-color: #f1f8f1; }
+        .explanation { display: none; margin-top: 10px; padding: 12px; border-radius: 6px; background-color: #fdecea; color: #c62828; border-left: 5px solid #d32f2f; font-size: 0.9rem; }
+        .show-explanation { display: block; }
+        .correct-mark { color: #2e7d32; font-weight: bold; display: none; margin-left: 10px; }
+
+        .btn-check-part { background: #34a853; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .btn-check-part:hover { background: #2d8e47; }
+        .part-score { font-weight: bold; color: #1a73e8; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Computer Graphics Final Quiz</h1>
+    <p style="text-align:center;">ทำทีละพาร์ท และกดตรวจเพื่อดูเฉลยข้อที่ผิดในพาร์ทนั้นๆ</p>
+
+    <div class="part-section" id="section-1">
+        <div class="part-header">
+            <span>PART 1: Transformation (1-20)</span>
+            <span id="score-text-1"></span>
+        </div>
+        <div id="q-container-1"></div>
+        <button class="btn-check-part" onclick="checkPart(1, 0, 20)">ตรวจคำตอบ PART 1</button>
+    </div>
+
+    <div class="part-section" id="section-2">
+        <div class="part-header">
+            <span>PART 2: Viewing & Projection (21-40)</span>
+            <span id="score-text-2"></span>
+        </div>
+        <div id="q-container-2"></div>
+        <button class="btn-check-part" onclick="checkPart(2, 20, 40)">ตรวจคำตอบ PART 2</button>
+    </div>
+
+    <div class="part-section" id="section-3">
+        <div class="part-header">
+            <span>PART 3: Lighting & Shading (41-60)</span>
+            <span id="score-text-3"></span>
+        </div>
+        <div id="q-container-3"></div>
+        <button class="btn-check-part" onclick="checkPart(3, 40, 60)">ตรวจคำตอบ PART 3</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // --- PART 1: 1-20 (Transformation) ---
+    { q: "พิกัด Homogeneous ของจุด (x, y) ใน 2 มิติคือข้อใด", a: "ข", hint: "เพิ่ม w=1 เพื่อใช้ในการเลื่อนที่ (Translation)", opt: ["ก. (x, y, 0)", "ข. (x, y, 1)", "ค. (1, x, y)", "ง. (x, y, x+y)"] },
+    { q: "การแปลงชนิดใด 'ไม่' จัดเป็น Basic Transformation", a: "ง", hint: "Projection อยู่ในขั้นตอน Viewing", opt: ["ก. Translation", "ข. Rotation", "ค. Scaling", "ง. Perspective Projection"] },
+    { q: "หากต้องการขยายวัตถุจากจุด Fixed Point ขั้นตอนแรกคือ?", a: "ข", hint: "ต้องย้ายจุดหมุนไปที่ Origin (0,0) ก่อน", opt: ["ก. ขยายทันที", "ข. เลื่อนจุดไปที่ (0,0)", "ค. หมุนวัตถุ", "ง. สลับแกน"] },
+    { q: "เมทริกซ์การเลื่อนที่ tx, ty อยู่ที่ไหนในเมทริกซ์ 3x3", a: "ก", hint: "คอลัมน์สุดท้าย แถว 1 และ 2", opt: ["ก. คอลัมน์ที่ 3", "ข. แถวแรก", "ค. เส้นทแยงมุม", "ง. แถวที่ 3"] },
+    { q: "Composite Transformation คืออะไร", a: "ข", hint: "การคูณเมทริกซ์หลายอันรวมกัน", opt: ["ก. การบวกเมทริกซ์", "ข. การรวมลำดับการแปลง", "ค. การวาดซ้อน", "ง. การลบเมทริกซ์"] },
+    { q: "หมุนรอบแกน Z ใน 3D เหมือนการหมุนแบบใด", a: "ข", hint: "เหมือนหมุน 2D ในระนาบ XY", opt: ["ก. หมุนรอบ X", "ข. หมุน 2D (XY)", "ค. ขยายวัตถุ", "ง. เลื่อนที่"] },
+    { q: "Affine Transformation รักษาสิ่งใด", a: "ค", hint: "รักษาความขนานของเส้นตรง", opt: ["ก. ระยะทาง", "ข. มุม", "ค. ความขนาน", "ง. พื้นที่"] },
+    { q: "การสะท้อนข้ามแกน X ทำให้พิกัดใดเปลี่ยน", a: "ข", hint: "Y กลายเป็น -Y", opt: ["ก. พิกัด X", "ข. พิกัด Y", "ค. ทั้งคู่", "ง. ไม่เปลี่ยน"] },
+    { q: "Shear Transformation ทำให้วัตถุเป็นอย่างไร", a: "ก", hint: "บิดเบี้ยว (Distortion)", opt: ["ก. บิดเบี้ยว", "ข. โตขึ้น", "ค. หมุน", "ง. หายไป"] },
+    { q: "BitBlt ใช้ทำอะไร", a: "ข", hint: "ย้ายบล็อกข้อมูลพิกเซล", opt: ["ก. หมุนภาพ", "ข. ย้ายข้อมูลพิกเซล", "ค. คำนวณแสง", "ง. ขยายภาพ"] },
+    { q: "พิกัด (4,2) สเกลด้วย (2,3) ได้พิกัดใหม่เท่าใด", a: "ค", hint: "(4*2, 2*3) = (8,6)", opt: ["ก. (6,5)", "ข. (2,1)", "ค. (8,6)", "ง. (12,4)"] },
+    { q: "Identity Matrix ใช้เพื่ออะไร", a: "ก", hint: "เป็นค่าเริ่มต้น ไม่เปลี่ยนแปลงวัตถุ", opt: ["ก. ค่าเริ่มต้นการแปลง", "ข. ลบข้อมูล", "ค. ล้างจอ", "ง. ขยาย"] },
+    { q: "หมุนทวนเข็มนาฬิกาเป็นมุมชนิดใด", a: "ก", hint: "มุมบวก (+)", opt: ["ก. มุมบวก", "ข. มุมลบ", "ค. มุมฉาก", "ง. มุมศูนย์"] },
+    { q: "Rigid-body Transformation ไม่เปลี่ยนสิ่งใด", a: "ข", hint: "รูปร่างและขนาดคงเดิม", opt: ["ก. ตำแหน่ง", "ข. รูปร่าง/ขนาด", "ค. มุมมอง", "ง. สี"] },
+    { q: "Inverse ของเลื่อนที่ (tx, ty) คืออะไร", a: "ค", hint: "(-tx, -ty)", opt: ["ก. (ty, tx)", "ข. (1/tx, 1/ty)", "ค. (-tx, -ty)", "ง. (0,0)"] },
+    { q: "3D Homogeneous ใช้พิกัดกี่ตัว", a: "ค", hint: "(x, y, z, w) รวม 4 ตัว", opt: ["ก. 2", "ข. 3", "ค. 4", "ง. 5"] },
+    { q: "แปลง World ไป Camera เรียกว่าอะไร", a: "ข", hint: "Viewing Transformation", opt: ["ก. Modeling", "ข. Viewing", "ค. Projection", "ง. Clipping"] },
+    { q: "เมทริกซ์หมุนมีคุณสมบัติอะไร", a: "ก", hint: "Orthogonal Matrix", opt: ["ก. Orthogonal", "ข. Singular", "ค. Zero", "ง. Symmetric"] },
+    { q: "Zoom in เทียบเท่าการแปลงแบบใด", a: "ข", hint: "Scaling", opt: ["ก. Translation", "ข. Scaling", "ค. Rotation", "ง. Reflection"] },
+    { q: "Uniform Scaling คืออะไร", a: "ก", hint: "ขยายทุกแกนเท่ากัน", opt: ["ก. ขยายทุกแกนเท่ากัน", "ข. ขยายเฉพาะ X", "ค. ขยายเฉพาะ Y", "ง. ลดขนาด"] },
+
+    // --- PART 2: 21-40 (Viewing) ---
+    { q: "ระบบพิกัดใดนิยามตำแหน่งวัตถุในโลกจำลอง", a: "ข", hint: "World Coordinates", opt: ["ก. Camera", "ข. World", "ค. Screen", "ง. Local"] },
+    { q: "OpenGL ใช้พิกัดมือข้างใด", a: "ข", hint: "Right-handed System", opt: ["ก. ซ้าย", "ข. ขวา", "ค. ทรงกลม", "ง. เชิงขั้ว"] },
+    { q: "View Volume ของ Perspective คือรูปอะไร", a: "ข", hint: "Frustum (พีระมิดตัด)", opt: ["ก. Cube", "ข. Frustum", "ค. Sphere", "ง. Cylinder"] },
+    { q: "Orthographic Projection เด่นเรื่องอะไร", a: "ก", hint: "รักษาสัดส่วนและเส้นขนาน", opt: ["ก. เส้นขนานไม่เปลี่ยน", "ข. ไกลจะเล็กลง", "ค. ดูสมจริง", "ง. มีจุดรวมสายตา"] },
+    { q: "Vanishing Point อยู่ในการฉายแบบใด", a: "ข", hint: "Perspective", opt: ["ก. Orthographic", "ข. Perspective", "ค. Oblique", "ง. Parallel"] },
+    { q: "แกน Z ใน View Space OpenGL พุ่งไปทางไหน", a: "ก", hint: "พุ่งเข้าหาผู้ดู", opt: ["ก. เข้าหาผู้ดู", "ข. ออกจากผู้ดู", "ค. ไปทางขวา", "ง. ลงล่าง"] },
+    { q: "Clipping คืออะไร", a: "ข", hint: "ตัดส่วนนอกมุมมองออก", opt: ["ก. ระบายสี", "ข. ตัดส่วนที่มองไม่เห็น", "ค. ขยาย", "ง. หมุน"] },
+    { q: "NDC ใน OpenGL มีค่าเท่าไหร่", a: "ข", hint: "-1 ถึง 1", opt: ["ก. 0 ถึง 1", "ข. -1 ถึง 1", "ค. 0 ถึง 255", "ง. ตามขนาดจอ"] },
+    { q: "คำสั่งกำหนดพื้นที่แสดงผลบนจอคือ?", a: "ค", hint: "glViewport", opt: ["ก. glMatrix", "ข. glClear", "ค. glViewport", "ง. glColor"] },
+    { q: "Aspect Ratio คืออะไร", a: "ก", hint: "กว้าง ต่อ สูง", opt: ["ก. กว้าง/สูง", "ข. สูง/กว้าง", "ค. กว้าง+สูง", "ง. พื้นที่"] },
+    { q: "Field of View (FOV) กว้างขึ้นมีผลอย่างไร", a: "ข", hint: "เห็นพื้นที่ในฉากมากขึ้น", opt: ["ก. ชัดขึ้น", "ข. เห็นกว้างขึ้น", "ค. มืดลง", "ง. สว่างขึ้น"] },
+    { q: "Near และ Far plane คืออะไร", a: "ค", hint: "ขอบเขตการมองเห็นแนวลึก", opt: ["ก. ความสว่าง", "ข. ตำแหน่ง", "ค. ขอบเขตลึก", "ง. ขนาดพิกเซล"] },
+    { q: "LookAt ต้องมีอะไรบ้าง", a: "ง", hint: "Eye, Center, Up", opt: ["ก. Eye", "ข. Eye/Up", "ค. Center/Up", "ง. Eye/Center/Up"] },
+    { q: "Z-Buffer ใช้ทำอะไร", a: "ข", hint: "จัดการวัตถุบังกัน (Depth Test)", opt: ["ก. เก็บสี", "ข. เก็บความลึก", "ค. โปร่งใส", "ง. เก็บแสง"] },
+    { q: "Back-face Culling ช่วยอะไร", a: "ก", hint: "ไม่วาดด้านหลังโพลิกอน", opt: ["ก. เพิ่มความเร็ว", "ข. ลบเงา", "ค. เปลี่ยนสี", "ง. ชัดขึ้น"] },
+    { q: "Sutherland-Hodgeman คืออะไร", a: "ก", hint: "Polygon Clipping", opt: ["ก. Polygon Clipping", "ข. Line Drawing", "ค. Shading", "ง. Ray Tracing"] },
+    { q: "Isometric เป็นการฉายแบบใด", a: "ค", hint: "Parallel Projection", opt: ["ก. Perspective", "ข. Oblique", "ค. Parallel", "ง. 3-point"] },
+    { q: "พิกัดกล้องเรียกอีกชื่อว่าอะไร", a: "ข", hint: "Eye Space", opt: ["ก. Model Space", "ข. Eye Space", "ค. Clip Space", "ง. World Space"] },
+    { q: "Window-to-Viewport เป็นการแปลงกี่มิติ", a: "ก", hint: "2 มิติ", opt: ["ก. 2 มิติ", "ข. 3 มิติ", "ค. 4 มิติ", "ง. 1 มิติ"] },
+    { q: "Projection Matrix มีหน้าที่อะไร", a: "ค", hint: "แปลง View Space เป็น Clip Space", opt: ["ก. ใส่สี", "ข. หมุน", "ค. กำหนดการฉาย", "ง. กำหนดผิว"] },
+
+    // --- PART 3: 41-60 (Lighting) ---
+    { q: "แสงชนิดใดสว่างเท่ากันทุกจุด", a: "ค", hint: "Ambient Light", opt: ["ก. Diffuse", "ข. Specular", "ค. Ambient", "ง. Point"] },
+    { q: "กฎของ Lambert ใช้กับแสงใด", a: "ก", hint: "Diffuse (ผิวหยาบ)", opt: ["ก. Diffuse", "ข. Specular", "ค. Ambient", "ง. Refraction"] },
+    { q: "Specular Highlight คือการสะท้อนแบบใด", a: "ข", hint: "แบบกระจก (Mirror-like)", opt: ["ก. กระจาย", "ข. เป็นจุดจ้า", "ค. คงที่", "ง. โปร่งแสง"] },
+    { q: "Phong Model ประกอบด้วยอะไร", a: "ข", hint: "Ambient+Diffuse+Specular", opt: ["ก. RGB", "ข. Amb/Diff/Spec", "ค. Light/Shadow", "ง. Eye/Light/Normal"] },
+    { q: "Flat Shading เป็นอย่างไร", a: "ค", hint: "เห็นเป็นเหลี่ยมโพลิกอน", opt: ["ก. เรียบเนียน", "ข. เป็นจุด", "ค. เป็นเหลี่ยม", "ง. สมจริง"] },
+    { q: "Gouraud Shading ทำงานอย่างไร", a: "ข", hint: "เกลี่ยสีที่จุดยอด", opt: ["ก. เกลี่ย Normal", "ข. เกลี่ยสีจุดยอด", "ค. คำนวณทุกพิกเซล", "ง. ไม่เกลี่ย"] },
+    { q: "Phong Shading ต่างจาก Gouraud อย่างไร", a: "ก", hint: "เกลี่ย Normal เสมือนจริงกว่า", opt: ["ก. เกลี่ย Normal", "ข. เร็วกว่า", "ค. ประหยัดแรม", "ง. ใช้สีน้อย"] },
+    { q: "Shininess (n) มีไว้ทำอะไร", a: "ข", hint: "คุมขนาดจุด Specular", opt: ["ก. เปลี่ยนสี", "ข. คุมขนาดจุดจ้า", "ค. มืดลง", "ง. เพิ่มเงา"] },
+    { q: "Normal Vector คืออะไร", a: "ข", hint: "เวกเตอร์ตั้งฉากพื้นผิว", opt: ["ก. ทิศทางแสง", "ข. ตั้งฉากพื้นผิว", "ค. มุมมอง", "ง. เวกเตอร์ศูนย์"] },
+    { q: "Ray-tracing คืออะไร", a: "ข", hint: "Global Illumination", opt: ["ก. ลากเส้น", "ข. ติดตามทางแสง", "ค. ระบายโพลิกอน", "ง. หมุนภาพ"] },
+    { q: "Attenuation คืออะไร", a: "ข", hint: "แสงอ่อนลงตามระยะ", opt: ["ก. แสงขาว", "ข. แสงลดความเข้ม", "ค. หักเห", "ง. รวมแสง"] },
+    { q: "Radiosity เหมาะกับผิวแบบใด", a: "ก", hint: "พื้นผิวด้าน (Diffuse)", opt: ["ก. พื้นผิวด้าน", "ข. ผิวมัน", "ค. กระจก", "ง. โลหะ"] },
+    { q: "Mach Band Effect พบใน Shading ใด", a: "ข", hint: "Gouraud / Flat", opt: ["ก. Phong", "ข. Gouraud", "ค. Ray-tracing", "ง. Texture"] },
+    { q: "Texture Mapping คืออะไร", a: "ก", hint: "แปะภาพบนวัตถุ", opt: ["ก. แปะภาพบนวัตถุ", "ข. วาดเส้น", "ค. คำนวณเงา", "ง. ลบเหลี่ยม"] },
+    { q: "Bump Mapping ช่วยเรื่องใด", a: "ข", hint: "สร้างผิวขรุขระหลอกตา", opt: ["ก. ใส", "ข. ผิวขรุขระ", "ค. สว่าง", "ง. เปลี่ยนร่าง"] },
+    { q: "Bresenham's ใช้ทำอะไร", a: "ก", hint: "วาดเส้นตรง (Line Drawing)", opt: ["ก. วาดเส้นตรง", "ข. วาดวงกลม", "ค. ระบายสี", "ง. หมุนภาพ"] },
+    { q: "Aliasing คืออะไร", a: "ค", hint: "รอยหยัก (Jaggies)", opt: ["ก. เบลอ", "ข. มืด", "ค. รอยหยักขอบ", "ง. สีเพี้ยน"] },
+    { q: "Anti-aliasing ช่วยอะไร", a: "ก", hint: "ลดรอยหยักให้ขอบเนียน", opt: ["ก. ลดรอยหยัก", "ข. เพิ่มสว่าง", "ค. ทำให้มืด", "ง. ประหยัดไฟ"] },
+    { q: "RGB (1,1,1) คือสีใด", a: "ก", hint: "สีขาว", opt: ["ก. ขาว", "ข. ดำ", "ค. แดง", "ง. เทา"] },
+    { q: "Alpha Channel คืออะไร", a: "ค", hint: "ความโปร่งใส (Opacity)", opt: ["ก. แสง", "ข. เงา", "ค. โปร่งใส", "ง. ความเข้ม"] }
+];
+
+function initQuiz() {
+    quizData.forEach((item, i) => {
+        let containerId = (i < 20) ? "q-container-1" : (i < 40 ? "q-container-2" : "q-container-3");
+        const container = document.getElementById(containerId);
+        
+        const optionsHTML = item.opt.map((o, idx) => {
+            const char = ["ก", "ข", "ค", "ง"][idx];
+            return `<label><input type="radio" name="q${i}" value="${char}"> ${o}</label>`;
+        }).join('');
+
+        container.innerHTML += `
+            <div class="q-box" id="qbox-${i}">
+                <span class="q-title">${i+1}. ${item.q} <span id="mark-${i}" class="correct-mark">✓</span></span>
+                <div class="options">${optionsHTML}</div>
+                <div id="exp-${i}" class="explanation"></div>
+            </div>
+        `;
+    });
+}
+
+function checkPart(partNum, start, end) {
+    let partScore = 0;
+    for (let i = start; i < end; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const box = document.getElementById(`qbox-${i}`);
+        const exp = document.getElementById(`exp-${i}`);
+        const mark = document.getElementById(`mark-${i}`);
+
+        // Reset
+        box.classList.remove('wrong-box', 'correct-box');
+        exp.classList.remove('show-explanation');
+        mark.style.display = 'none';
+
+        if (selected) {
+            if (selected.value === quizData[i].a) {
+                partScore++;
+                box.classList.add('correct-box');
+                mark.style.display = 'inline';
+            } else {
+                box.classList.add('wrong-box');
+                exp.classList.add('show-explanation');
+                exp.innerHTML = `<strong>เฉลย: ข้อ ${quizData[i].a}</strong> | ${quizData[i].hint}`;
+            }
+        } else {
+            box.classList.add('wrong-box');
+            exp.classList.add('show-explanation');
+            exp.innerHTML = `<strong>ยังไม่ได้ตอบ!</strong> (เฉลยคือ ${quizData[i].a})`;
+        }
+    }
+    document.getElementById(`score-text-${partNum}`).innerText = `คะแนนพาร์ทนี้: ${partScore} / 20`;
+}
+
+initQuiz();
+</script>
+</body>
+</html>
